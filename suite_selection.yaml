@@ -5,21 +5,23 @@
 # ============================================================================
 
 Smoke Tests:
-  Example Login Test:                         true
-  Verify Upload Page Loads:                   false
-  Verify Upload Table Columns Are Visible:    false
-  Verify Search Bar Is Visible:               false
+  Example Login Test:                               true
+  Verify Upload Page Loads:                         false
+  Verify Upload Table Columns Are Visible:          false
+  Verify Search Bar Is Visible:                     false
 
 Upload Tests:
-  Upload JPEG Image File:                     false
-  Upload PDF Document File:                   false
-  Upload PNG Image File:                      false
+  Cancel Upload Dialog:                             false
+  Upload Single Image File:                         false
+  Upload JPEG Image File:                           false
+  Upload PDF Document File:                         false
+  Upload PNG Image File:                            false
   Verify Batch File Upload Dialog Opens And Cancels: false
 
 Search Tests:
-  Search By Product Keyword:                  false
-  Search By Exact STEP ID:                    false
-  Search By Partial File Name:                false
-  Search By Multi Word Phrase:                false
-  Search With No Results:                     false
-  Search From List Button Opens Dialog:       false
+  Search By Product Keyword:                        false
+  Search By Exact STEP ID:                          false
+  Search By Partial File Name:                      false
+  Search By Multi Word Phrase:                      false
+  Search With No Results:                           false
+  Search From List Button Opens Dialog:             false

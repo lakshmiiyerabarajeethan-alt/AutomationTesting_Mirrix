@@ -23,6 +23,8 @@ $testFileMap = @{
     "Verify Upload Table Columns Are Visible"          = "upload_tests.robot"
     "Verify Search Bar Is Visible"                     = "search_tests.robot"
     # Upload
+    "Cancel Upload Dialog"                             = "upload_single_file_tests.robot"
+    "Upload Single Image File"                         = "upload_single_file_tests.robot"
     "Upload JPEG Image File"                           = "upload_tests.robot"
     "Upload PDF Document File"                         = "upload_tests.robot"
     "Upload PNG Image File"                            = "upload_tests.robot"
