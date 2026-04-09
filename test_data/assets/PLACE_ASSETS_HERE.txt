@@ -1,0 +1,21 @@
+============================================================
+  Mirrix Test Automation — Test Asset Files
+============================================================
+
+Place your real test asset files in this folder before running
+the upload tests. The following files are referenced in
+upload_test_data.xlsx (Upload Tests sheet):
+
+  File Name                  Format   Purpose
+  -------------------------  -------  --------------------------------
+  sample_image.jpg           JPEG     Product image upload test
+  sample_document.pdf        PDF      Product specification upload test
+  sample_image.png           PNG      PNG image upload test
+  sample_spreadsheet.xlsx    Excel    Excel data sheet upload test
+  sample_video.mp4           MP4      Video asset upload test
+
+Notes:
+  - Keep file sizes small for CI/CD pipelines (< 5 MB each)
+  - These files are NOT committed to git (see .gitignore)
+  - Add new assets here and register them in upload_test_data.xlsx
+============================================================

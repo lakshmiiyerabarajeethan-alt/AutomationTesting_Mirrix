@@ -15,10 +15,25 @@ function Ok($msg)     { Write-Host "  $msg" -ForegroundColor Green }
 function Warn($msg)   { Write-Host "  $msg" -ForegroundColor Yellow }
 function Info($msg)   { Write-Host "  $msg" -ForegroundColor White }
 
-# ── Map test names to their suite files ───────────────────────────────────────
+# ── Map test names → suite files ──────────────────────────────────────────────
 $testFileMap = @{
-    "Full E2E Workflow"   = "full_e2e_tests.robot"
-    "Example Login Test"  = "example_tests.robot"
+    # Smoke
+    "Example Login Test"                               = "example_tests.robot"
+    "Verify Upload Page Loads"                         = "upload_tests.robot"
+    "Verify Upload Table Columns Are Visible"          = "upload_tests.robot"
+    "Verify Search Bar Is Visible"                     = "search_tests.robot"
+    # Upload
+    "Upload JPEG Image File"                           = "upload_tests.robot"
+    "Upload PDF Document File"                         = "upload_tests.robot"
+    "Upload PNG Image File"                            = "upload_tests.robot"
+    "Verify Batch File Upload Dialog Opens And Cancels" = "upload_tests.robot"
+    # Search
+    "Search By Product Keyword"                        = "search_tests.robot"
+    "Search By Exact STEP ID"                          = "search_tests.robot"
+    "Search By Partial File Name"                      = "search_tests.robot"
+    "Search By Multi Word Phrase"                      = "search_tests.robot"
+    "Search With No Results"                           = "search_tests.robot"
+    "Search From List Button Opens Dialog"             = "search_tests.robot"
 }
 
 # ── Parse suite_selection.yaml ────────────────────────────────────────────────
@@ -51,7 +66,7 @@ function Read-SkippedTests {
     return $skipped
 }
 
-# ── Show current selection ────────────────────────────────────────────────────
+# ── Banner ────────────────────────────────────────────────────────────────────
 Clear-Host
 Header "============================================="
 Header "   Mirrix Automation -- Test Suite Runner    "
@@ -69,14 +84,10 @@ if ($selectedTests.Count -eq 0) {
 }
 
 Info "Tests selected to run:"
-foreach ($t in $selectedTests) {
-    Ok "  [x] $t"
-}
+foreach ($t in $selectedTests) { Ok "  [x] $t" }
 
 $skippedTests = Read-SkippedTests
-foreach ($t in $skippedTests) {
-    Info "  [ ] $t  -- skipped"
-}
+foreach ($t in $skippedTests) { Info "  [ ] $t  -- skipped" }
 
 Info ""
 $confirm = Read-Host "  Run these tests? [Y/n]"
@@ -85,38 +96,25 @@ if ($confirm -eq "n" -or $confirm -eq "N") {
     exit 0
 }
 
-# ── Build robot command ───────────────────────────────────────────────────────
-$testArgs   = $selectedTests | ForEach-Object { "--test `"$_`"" }
+# ── Build and run robot command ───────────────────────────────────────────────
 $suiteFiles = $selectedTests | ForEach-Object { $testFileMap[$_] } | Select-Object -Unique
-$suiteArgs  = $suiteFiles    | ForEach-Object { "`"$TESTS\$_`"" }
 
-$fullCmd = ($testArgs + $suiteArgs) -join ' '
-
-Info ""
-Info "Command: robot --outputdir `"$OUT`" $fullCmd"
-Info ""
-
-# ── Run ───────────────────────────────────────────────────────────────────────
 $robotArgs = [System.Collections.Generic.List[string]]::new()
-$robotArgs.Add("--outputdir")
-$robotArgs.Add($OUT)
-foreach ($t in $selectedTests) {
-    $robotArgs.Add("--test")
-    $robotArgs.Add($t)
-}
-foreach ($f in $suiteFiles) {
-    $robotArgs.Add("$TESTS\$f")
-}
+$robotArgs.Add("--outputdir"); $robotArgs.Add($OUT)
+foreach ($t in $selectedTests) { $robotArgs.Add("--test"); $robotArgs.Add($t) }
+foreach ($f in $suiteFiles)    { $robotArgs.Add("$TESTS\$f") }
+
+Info ""
+Info "Command: robot --outputdir `"$OUT`" ..."
+Info ""
+
 & $ROBOT @robotArgs
 $exitCode = $LASTEXITCODE
 
 # ── Result ────────────────────────────────────────────────────────────────────
 Info ""
-if ($exitCode -eq 0) {
-    Ok "All selected tests PASSED"
-} else {
-    Warn "Some tests FAILED (exit code: $exitCode)"
-}
+if ($exitCode -eq 0) { Ok "All selected tests PASSED" }
+else { Warn "Some tests FAILED (exit code: $exitCode)" }
 
 Info ""
 Info "Report : $OUT\report.html"
@@ -124,6 +122,4 @@ Info "Log    : $OUT\log.html"
 Info ""
 
 $open = Read-Host "  Open report in browser? [Y/n]"
-if ($open -ne "n" -and $open -ne "N") {
-    Start-Process "$OUT\report.html"
-}
+if ($open -ne "n" -and $open -ne "N") { Start-Process "$OUT\report.html" }

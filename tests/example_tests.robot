@@ -9,12 +9,10 @@ Test Teardown   Take Screenshot On Failure
 
 *** Test Cases ***
 Example Login Test
-    [Documentation]    Verifies that login to Mirrix succeeds and homepage loads.
+    [Documentation]    Smoke test — verifies login to Mirrix succeeds and main nav loads.
     [Tags]    smoke    login
     Login To Mirrix
-    # TODO: Add assertion for homepage element once selectors are known
-    # e.g. Wait For Elements State    role=heading[name="Dashboard"]    visible
-    Log    Login test placeholder — update with real assertions
-
-*** Keywords ***
-# Add page-specific keywords here or in the pages/ directory
+    Wait For Elements State    text=Upload        visible    timeout=${TIMEOUT}
+    Wait For Elements State    text=Collections   visible    timeout=${TIMEOUT}
+    Wait For Elements State    text=Folders       visible    timeout=${TIMEOUT}
+    Log    Smoke test passed — Mirrix navigation bar is visible
