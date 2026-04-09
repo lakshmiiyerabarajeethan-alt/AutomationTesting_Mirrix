@@ -1,0 +1,11 @@
+# Robot Framework project configuration
+
+# Run all tests:     robot --outputdir results tests/
+# Run single suite:  robot --outputdir results tests/example_tests.robot
+# Parallel run:      pabot --outputdir results tests/
+
+variables:
+  - resources/variables/common_variables.robot
+
+pythonpath:
+  - .

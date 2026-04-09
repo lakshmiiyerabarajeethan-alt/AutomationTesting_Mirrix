@@ -1,0 +1,11 @@
+# ============================================================================
+# suite_selection.yaml  —  Pick which tests to run
+# Set true to RUN, false to SKIP
+# Then run:  .\run_suite.ps1
+# ============================================================================
+
+E2E Tests:
+  Full E2E Workflow: false
+
+Web Tests:
+  Example Login Test: true

@@ -1,0 +1,131 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Azure Pipeline — Robot Framework Mirrix Automation Suite
+#
+# IMPORTANT: This pipeline runs on a self-hosted Windows agent.
+#
+# Self-hosted agent setup:
+#   1. Go to Azure DevOps → Project Settings → Agent Pools
+#   2. Create a pool (e.g. "WindowsAgents")
+#   3. Download and register the agent on the Windows machine
+#   4. Update the "name:" field below to match your pool name
+#
+# Credentials setup:
+#   1. Go to Azure DevOps → Pipelines → Library → + Variable Group
+#   2. Name the group: Mirrix-Credentials
+#   3. Add these variables (mark all as secret):
+#        MIRRIX_URL          e.g. https://your-mirrix-instance.example.com
+#        MIRRIX_USERNAME
+#        MIRRIX_PASSWORD
+# ══════════════════════════════════════════════════════════════════════════════
+
+trigger:
+  branches:
+    include:
+      - master
+
+# ── Scheduled runs ────────────────────────────────────────────────────────────
+schedules:
+  # Weekdays at 07:00 UTC (09:00 Helsinki / EET, 10:00 EEST in summer)
+  - cron: '0 7 * * 1-5'
+    displayName: Weekday morning run (09:00 Helsinki)
+    branches:
+      include:
+        - master
+    always: true
+
+# Manual run parameters
+parameters:
+  - name: testSuite
+    displayName: Test Suite to Run
+    type: string
+    default: Example Login Test
+    values:
+      - Example Login Test
+      - Full E2E Workflow
+
+# ── Agent pool ────────────────────────────────────────────────────────────────
+pool:
+  name: WindowsAgents    # <-- replace with your agent pool name
+
+# ── Variable group ────────────────────────────────────────────────────────────
+variables:
+  - group: Mirrix-Credentials
+  - name: resultsDir
+    value: $(Build.ArtifactStagingDirectory)\results
+
+# ══════════════════════════════════════════════════════════════════════════════
+steps:
+
+# ── 1. Python setup ───────────────────────────────────────────────────────────
+  - task: UsePythonVersion@0
+    displayName: Use Python 3.x
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
+
+# ── 2. Install dependencies ───────────────────────────────────────────────────
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    displayName: Install Python dependencies
+
+# ── 3. Initialise Playwright browsers (Browser library) ──────────────────────
+  - script: rfbrowser init
+    displayName: Initialise Robot Framework Browser (Playwright)
+
+# ── 4. Write .env from Azure DevOps variable group secrets ───────────────────
+  - task: PowerShell@2
+    displayName: Write .env from pipeline secrets
+    inputs:
+      targetType: inline
+      script: |
+        $envContent = @"
+        MIRRIX_URL=$(MIRRIX_URL)
+        MIRRIX_USERNAME=$(MIRRIX_USERNAME)
+        MIRRIX_PASSWORD=$(MIRRIX_PASSWORD)
+        "@
+        $envContent.Trim() | Set-Content -Path .env -Encoding UTF8
+        Write-Host ".env written successfully (values masked)"
+
+# ── 5. Run Robot Framework tests ──────────────────────────────────────────────
+  - task: PowerShell@2
+    displayName: Run Robot Framework — ${{ parameters.testSuite }}
+    inputs:
+      targetType: inline
+      script: |
+        New-Item -ItemType Directory -Force -Path "$(resultsDir)" | Out-Null
+        robot `
+          --test "${{ parameters.testSuite }}" `
+          --outputdir "$(resultsDir)" `
+          --xunit xunit.xml `
+          tests\
+    continueOnError: true
+
+# ── 6. Publish test results to Azure Pipelines ────────────────────────────────
+  - task: PublishTestResults@2
+    displayName: Publish test results
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: $(resultsDir)\xunit.xml
+      failTaskOnFailedTests: true
+      testRunTitle: Robot Framework — ${{ parameters.testSuite }}
+    condition: always()
+
+# ── 7. Publish full robot logs as downloadable artifacts ─────────────────────
+  - task: PublishBuildArtifacts@1
+    displayName: Publish robot logs and screenshots
+    inputs:
+      PathtoPublish: $(resultsDir)
+      ArtifactName: robot-results
+      publishLocation: Container
+    condition: always()
+
+# ── 8. Clean up .env so it is not left on the agent disk ─────────────────────
+  - task: PowerShell@2
+    displayName: Remove .env from agent
+    inputs:
+      targetType: inline
+      script: |
+        if (Test-Path .env) { Remove-Item .env -Force }
+        Write-Host ".env removed from agent"
+    condition: always()
