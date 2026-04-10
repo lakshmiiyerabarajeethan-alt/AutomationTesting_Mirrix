@@ -10,13 +10,18 @@ Go To Upload Page
 
 Select File For Upload
     [Arguments]    ${file_path}
-    Upload File By Selector     role=button[name="Select files"]    ${file_path}
+    Upload File By Selector     css=input[type="file"]    ${file_path}
     Wait For Elements State     text=Batch File Upload              visible    timeout=${TIMEOUT}
 
 Set Upload Profile
     [Arguments]    ${profile}
-    Click           text=Default
-    Click           text=${profile}
+    ${profile_selector}=    Set Variable    css=.ant-modal-content .ant-select-selector
+    ${open_dropdown}=       Set Variable    css=.ant-select-dropdown:not(.ant-select-dropdown-hidden)
+    Wait For Elements State     ${profile_selector}    visible    timeout=${TIMEOUT}
+    Click                       ${profile_selector}
+    Press Keys                  ${profile_selector}    ArrowDown
+    Wait For Elements State     ${open_dropdown}    visible    timeout=${TIMEOUT}
+    Click                       ${open_dropdown} >> text=${profile}
 
 Fill Batch Description
     [Arguments]    ${description}
@@ -39,6 +44,12 @@ Submit Upload
     Click                       role=button[name="Upload"]
     Wait For Elements State     text=Uploading... 100%    visible    timeout=60s
 
+Auto Refresh Upload Page
+    [Arguments]    ${delay}=2s
+    Sleep                      ${delay}
+    Reload
+    Wait For Elements State    role=button[name="Select files"]    visible    timeout=${TIMEOUT}
+
 Cancel Upload Dialog
     Click                       role=button[name="Cancel"]
     Wait For Elements State     text=Batch File Upload    hidden    timeout=${TIMEOUT}
@@ -58,7 +69,13 @@ Close Asset Preview
 Navigate To Asset Detail
     [Arguments]    ${step_id}
     Click                       role=link[name="${step_id}"]
-    Wait For Elements State     css=.w-full.justify-between          visible    timeout=${TIMEOUT}
 
 Navigate Back Via Breadcrumb
     Click                       role=list >> role=link >> nth=0
+
+Get Step ID By File Name
+    [Arguments]    ${file_name}
+    ${row_selector}=    Set Variable    css=table tbody tr:has-text("${file_name}")
+    Wait For Elements State     ${row_selector}    visible    timeout=${TIMEOUT}
+    ${step_id}=    Get Text     ${row_selector} >> td >> nth=1
+    RETURN    ${step_id}
