@@ -1,5 +1,6 @@
 """
 test_data_reader.py — Utility for reading test data from YAML and Excel files.
+Exposed as a Robot Framework library via the robotframework-browser Library import.
 """
 
 import yaml
@@ -32,5 +33,29 @@ def read_excel_sheet(file_path: str, sheet_name: str = None) -> list[dict]:
     if not rows:
         return []
 
-    headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
-    return [dict(zip(headers, row)) for row in rows[1:]]
+    headers = [
+        str(h).strip() if h is not None else f"col_{i}"
+        for i, h in enumerate(rows[0])
+    ]
+    return [dict(zip(headers, row)) for row in rows[1:] if any(v is not None for v in row)]
+
+
+def resolve_asset_path(assets_root: str, subfolder: str, file_name: str) -> str:
+    """
+    Build the full path to a test asset using the subfolder structure:
+      test_assets/{subfolder}/{file_name}
+
+    Args:
+        assets_root:  Value of ${ASSETS_DIR} — path to the test_assets/ root
+        subfolder:    Value of the "Asset Subfolder" column (images/documents/etc.)
+        file_name:    Value of the "File Name" column
+
+    Returns:
+        Full resolved path string
+
+    Example:
+        resolve_asset_path("/path/to/test_assets", "images", "product.jpg")
+        → "/path/to/test_assets/images/product.jpg"
+    """
+    resolved = Path(assets_root) / (subfolder or "").strip() / file_name.strip()
+    return str(resolved)

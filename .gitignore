@@ -32,15 +32,16 @@ playwright-report/
 *.key
 secrets.yaml
 
-# Test assets (binary files — add manually per project)
-test_data/assets/*.jpg
-test_data/assets/*.jpeg
-test_data/assets/*.png
-test_data/assets/*.pdf
-test_data/assets/*.mp4
-test_data/assets/*.mov
-test_data/assets/*.xlsx
-test_data/assets/*.csv
+# Test assets (binary files — add manually per machine, never commit)
+test_data/assets/*
+!test_data/assets/.gitkeep
+
+test_assets/images/*
+test_assets/documents/*
+test_assets/videos/*
+test_assets/spreadsheets/*
+test_assets/other/*
+!test_assets/**/.gitkeep
 
 # IDE
 .vscode/

@@ -49,11 +49,12 @@ Upload Single Image File
 Load Upload Test Data
     ${rows}=    Read Excel Sheet    ${EXCEL_FILE}    ${UPLOAD_SHEET}
     ${row}=    Get Upload Test Data Row    ${rows}    ${UPLOAD_TC_ID}
-    ${file_name}=    Get From Dictionary    ${row}    File Name
-    ${upload_profile}=    Get From Dictionary    ${row}    Upload Profile
-    ${batch_desc}=    Get From Dictionary    ${row}    Upload Batch Description
-    ${batch_tag}=    Get From Dictionary    ${row}    Upload Batch Tags
-    ${file_path}=    Set Variable    ${ASSETS_DIR}${/}${file_name}
+    ${file_name}=       Get From Dictionary    ${row}    File Name
+    ${subfolder}=       Get From Dictionary    ${row}    Asset Subfolder
+    ${upload_profile}=  Get From Dictionary    ${row}    Upload Profile
+    ${batch_desc}=      Get From Dictionary    ${row}    Upload Batch Description
+    ${batch_tag}=       Get From Dictionary    ${row}    Upload Batch Tags
+    ${file_path}=       Resolve Asset Path     ${ASSETS_DIR}    ${subfolder}    ${file_name}
     ${step_status}    ${step_id}=    Run Keyword And Ignore Error    Get From Dictionary    ${row}    Step ID
     IF    '${step_status}' != 'PASS'
         ${step_id}=    Set Variable    ${EMPTY}
